@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Master Prompt – Technical Monitoring Dashboard Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 40px auto;
+      max-width: 1100px;
+      padding: 0 20px;
+      line-height: 1.5;
+      color: #1f2328;
+    }
+    header {
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-size: 1.6rem;
+      margin: 0 0 8px 0;
+    }
+    .meta {
+      color: #656d76;
+      font-size: 0.95rem;
+    }
+    .card {
+      border: 1px solid #d0d7de;
+      border-radius: 12px;
+      padding: 16px;
+      background: #fff;
+      box-shadow: 0 1px 0 rgba(31,35,40,0.04);
+    }
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin: 0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.95rem;
+      line-height: 1.45;
+    }
+    .hint {
+      margin-top: 12px;
+      color: #656d76;
+      font-size: 0.95rem;
+    }
+    .kbd {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      background: #f6f8fa;
+      border: 1px solid #d0d7de;
+      border-bottom-width: 2px;
+      border-radius: 6px;
+      padding: 2px 6px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Master Prompt – Technical Monitoring Dashboard Generator</h1>
+    <div class="meta">Generated: 2026-02-21 22:44 UTC</div>
+    <div class="hint">Tip: click inside the prompt, press <span class="kbd">Ctrl/Cmd + A</span> then <span class="kbd">Ctrl/Cmd + C</span> to copy.</div>
+  </header>
+
+  <div class="card">
+    <pre>You are to generate a complete, production-ready, standalone HTML5 + JavaScript dashboard according to the exact specification below.
+
+IMPORTANT WORKFLOW (DO NOT SKIP)
+1) FIRST, read the full spec.
+2) SECOND, perform a self-verification checklist:
+   - List every required feature/component from the spec as a checklist.
+   - Briefly confirm (yes/no) whether you can implement each item exactly as specified.
+3) THIRD, ask the user any clarifying questions that are genuinely required to implement the spec correctly (limit to essential questions only). 
+   - If nothing is unclear, explicitly say: “No clarifying questions needed.”
+4) ONLY AFTER steps (1)–(3) are complete and the user answers any clarifying questions (if any), output the final code.
+5) Before outputting code, re-run the checklist and confirm every item is satisfied.
+
+OUTPUT RULES
+- When you output the code, output ONLY the full HTML file content, nothing else.
+- The output must be a single self-contained HTML file (Option A architecture) with embedded CSS and JavaScript.
+- No external build tools. No frameworks.
+- Only CDN libraries are allowed (e.g., MathJax and a lightweight chart library if needed).
+- Do not omit any feature. Do not simplify the specification.
+
+---
+
+# SYSTEM OVERVIEW
+
+Build a deterministic technical monitoring dashboard with:
+
+- Pure HTML5 + JavaScript (client-side only)
+- No backend
+- Data source: Stooq CSV
+- Works on localhost or GitHub Pages
+- No automatic fetch on page load
+- User must explicitly click Refresh
+
+The dashboard must contain:
+
+- Left sidebar navigation
+  - Tab 1: Overview / Scanner
+  - Tab 2: Monitoring
+- Documentation drawer (opens from anywhere)
+- MathJax rendering for formulas
+- Deterministic state logic exactly as defined below
+
+---
+
+# DATA SOURCE
+
+Stooq CSV endpoints:
+
+Daily:
+https://stooq.com/q/d/l/?s=<symbol>&i=d
+
+Weekly:
+https://stooq.com/q/d/l/?s=<symbol>&i=w
+
+Symbols must be entered in Stooq-compatible format (e.g., voo.us).
+
+No symbol mapping logic.
+
+---
+
+# TAB 1 — WATCHLIST SCANNER
+
+Global frequency toggle (Weekly default).
+
+Editable watchlist:
+- Max 15 symbols
+- Default list pre-populated with:
+
+voo.us
+vgt.us
+qqq.us
+vxus.us
+vht.us
+vfh.us
+vde.us
+vnq.us
+vox.us
+vcr.us
+vdc.us
+vis.us
+vaw.us
+vpu.us
+
+Behavior:
+- No auto-fetch on load
+- Buttons:
+  - Refresh All (concurrency cap 4)
+  - Per-row Fetch
+  - Per-row Use Cached
+  - Remove row
+- Preserve watchlist order
+- Allow column sorting (do not auto-sort)
+
+Per-row columns:
+
+Symbol
+Determinate
+Eligible
+Tactical State
+Concordant?
+k_C
+Last Event
+Transition Density (m=10 weeks)
+Mode (Live/Cached/Failed)
+Data End Date
+
+Tier Classification:
+
+Tier A:
+E_t = 1
+S_t = T1
+k_C >= 3
+
+Tier B:
+Fresh transition into T1
+
+Tier C:
+E_t = 1 but discordant
+
+Display Tier clearly but do not auto-sort by it.
+
+Cache:
+- Retain last-good snapshot in localStorage
+- Retain cache even if symbol removed
+
+---
+
+# TAB 2 — MONITORING
+
+Symbol input + Submit button.
+
+Weekly default, Daily toggle available.
+
+Display:
+
+Sticky state strip with:
+- Determinate / Indeterminate (+ reasons)
+- Eligibility
+- Tactical State (T1–T4)
+- Concordant/Discordant
+- k_C
+- Most recent event
+
+Charts:
+- Price + T40
+- D_t with zero line
+- RSI with 50 line
+
+Event log:
+- Eligibility toggles
+- D_t zero crossings
+- RSI 50 crossings
+
+---
+
+# INDICATOR DEFINITIONS
+
+Let P_t be closing price.
+
+T40:
+T_{40,t} = (1/40) * sum_{i=0}^{39} P_{t-i}
+
+Delta T40:
+ΔT_{40,t} = T_{40,t} - T_{40,t-1}
+
+EMA 26:
+T_{26,t} = α_26 P_t + (1 - α_26) T_{26,t-1}
+α_26 = 2/27
+
+EMA 12:
+T_{12,t} = α_12 P_t + (1 - α_12) T_{12,t-1}
+α_12 = 2/13
+
+D_t:
+D_t = T_{12,t} - T_{26,t}
+
+RSI(14), Wilder smoothing:
+α = 1/14
+
+Define:
+ΔP_t = P_t - P_{t-1}
+G_t = max(ΔP_t, 0)
+L_t = max(-ΔP_t, 0)
+
+AvgGain_t = α G_t + (1-α) AvgGain_{t-1}
+AvgLoss_t = α L_t + (1-α) AvgLoss_{t-1}
+
+RS_t = AvgGain_t / AvgLoss_t
+
+RSI_t = 100 - 100 / (1 + RS_t)
+
+Eligibility:
+E_t = 1 if (P_t > T_{40,t} AND ΔT_{40,t} > 0)
+
+Tactical states:
+T1: D_t >= 0 AND RSI_t >= 50
+T2: D_t >= 0 AND RSI_t < 50
+T3: D_t < 0 AND RSI_t >= 50
+T4: D_t < 0 AND RSI_t < 50
+
+Concordance:
+C_t = 1 if aligned (T1 or T4)
+
+Run length:
+k_C(t) increments while C_t=1, else 0
+
+Transition density:
+Count of transitions in last m=10 bars:
+- Eligibility toggle
+- D_t crossing 0
+- RSI crossing 50
+
+---
+
+# INDETERMINATE STATE
+
+Trigger when:
+- Insufficient lookback history
+- Missing/malformed data
+- Fetch failure
+
+Do not compute tactical state if indeterminate.
+
+---
+
+# DOCUMENTATION DRAWER
+
+Must include:
+
+For each defined concept:
+
+1. Plain Language Description
+2. Statistical Description (text first)
+3. Mathematical formula (MathJax)
+4. Financial Terminology (industry shorthand)
+5. Interpretation in this system
+
+Include preamble:
+
+“All quantities are deterministic transformations of P_t. No alternative smoothing conventions are implemented.”
+
+Use MathJax via CDN.
+
+---
+
+# IMPLEMENTATION REQUIREMENTS
+
+- Single standalone HTML file
+- Embedded CSS and JS
+- Concurrency-limited fetch queue (max 4 simultaneous)
+- Strict CSV validation:
+  - Numeric closes
+  - Strictly increasing dates
+  - No duplicates
+- Progressive loading UI
+- No automatic fetch on page load
+- Clean, institutional styling (minimalist, professional)
+
+Produce only the HTML file content AFTER the workflow steps and after any clarifying questions are answered.
+
+END PROMPT
+</pre>
+  </div>
+</body>
+</html>
