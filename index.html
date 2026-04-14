@@ -1193,14 +1193,42 @@ const MAX_CONCURRENT = 4;
 // ============================================================
 // INIT
 // ============================================================
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
   loadWatchlistFromStorage();
   if (watchlist.length === 0) {
     watchlist = DEFAULT_WATCHLIST.map(s => ({ symbol: s, result: null, mode: 'idle' }));
   }
   renderWatchlist();
   buildDocumentation();
+
+  // Auto-load static data files on startup — no user action needed
+  await autoLoadStaticData();
 });
+
+async function autoLoadStaticData() {
+  // Try to load each watchlist symbol from static data/ files silently
+  const freq = globalFreq;
+  let anyLoaded = false;
+
+  for (const row of watchlist) {
+    try {
+      const { rows, fetchedAt } = await fetchStaticData(row.symbol, freq);
+      setCacheEntry(row.symbol, freq, rows);
+      const result = computeFullResult(rows);
+      result.rows = rows;
+      row.result = result;
+      row.mode = 'live';
+      anyLoaded = true;
+    } catch(e) {
+      // Static file missing or invalid — leave as idle, user can fetch manually
+    }
+  }
+
+  if (anyLoaded) {
+    renderWatchlist();
+    saveWatchlistToStorage();
+  }
+}
 
 // ============================================================
 // TAB SWITCHING
@@ -1241,13 +1269,8 @@ function setMonFreq(freq) {
 // Fallback: public CORS proxy waterfall (manual Fetch button only)
 
 // Resolve base URL so static files work both on GitHub Pages and locally
-const BASE_URL = (() => {
-  const loc = window.location;
-  // If opened as a local file, data/ is relative to the HTML file
-  if (loc.protocol === 'file:') return '';
-  // On GitHub Pages or any HTTP server, use the page's base path
-  return loc.origin + loc.pathname.replace(/\/[^/]*$/, '');
-})();
+// Relative base — works on GitHub Pages, any subpath, and local file://
+const BASE_URL = '.';
 
 // Public CORS proxy waterfall — used only for manual live Fetch
 const CORS_PROXIES = [
@@ -1271,7 +1294,7 @@ function symKey(symbol) {
 
 // Load static JSON file written by GitHub Actions
 async function fetchStaticData(symbol, freq) {
-  const path = `${BASE_URL}/data/${symKey(symbol)}_${freq}.json`;
+  const path = `./data/${symKey(symbol)}_${freq}.json`;
   const resp = await fetch(path, { signal: AbortSignal.timeout(8000) });
   if (!resp.ok) throw new Error(`Static file not found (HTTP ${resp.status})`);
   const json = await resp.json();
@@ -1345,7 +1368,7 @@ function updateProxyStatus(idx, ok, fetchedAt) {
 // Load manifest on startup to show last update time
 window.addEventListener('DOMContentLoaded', async () => {
   try {
-    const resp = await fetch(`${BASE_URL}/data/manifest.json`, { signal: AbortSignal.timeout(4000) });
+    const resp = await fetch(`./data/manifest.json`, { signal: AbortSignal.timeout(4000) });
     if (resp.ok) {
       const manifest = await resp.json();
       const el = document.getElementById('proxy-status');
