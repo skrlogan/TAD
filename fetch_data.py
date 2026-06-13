@@ -22,7 +22,7 @@ import yfinance as yf
 SYMBOLS = [
     'VOO', 'VGT', 'QQQ', 'VXUS', 'VHT',
     'VFH', 'VDE', 'VNQ', 'VOX', 'VCR',
-    'VDC', 'VIS', 'VAW', 'VPU',
+    'VDC', 'VIS', 'VAW', 'VPU', 'TLT', 'ROBO' , 'QTUM'
 ]
 
 FREQUENCIES = ['w', 'd']
