@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-06-12T22:18:29.833635+00:00",
+  "fetched_at": "2026-06-14T21:12:05.478948+00:00",
   "symbols": [
     "VOO",
     "VGT",
@@ -14,12 +14,15 @@
     "VDC",
     "VIS",
     "VAW",
-    "VPU"
+    "VPU",
+    "TLT",
+    "ROBO",
+    "QTUM"
   ],
   "frequencies": [
     "w",
     "d"
   ],
-  "ok": 28,
+  "ok": 34,
   "failed": 0
 }
